@@ -1,0 +1,67 @@
+task1:
+
+with tab as(
+select artist_mb, sum(scrobbles_lastfm) as total
+from artists1 group by artist_mb order by total desc limit 1)
+select artist_mb from tab;
+
+Phoenix
+
+task2:
+
+with tab as(
+select explode(split(t.tags_lastfm, ";")) as col from artists4 t)
+select tab.col, count(tab.col) as cnt from tab where tab.col != "" 
+group by tab.col order by cnt desc limit 1;
+
+seen live 81278
+
+task3:
+
+with tab as(
+select tag as tag, artist_mb as name from artists9
+LATERAL VIEW explode(split(tags_lastfm, ";")) artists9 as tag 
+),
+tab1 as( select tab.tag as tag, count(tab.tag) as cnt from tab where tab.tag != ""
+group by tab.tag order by cnt desc limit 10),
+top10 as( select tag from tab1),
+top10_names as( select * from tab where tag IN (
+select tag from top10)),
+res as(
+select name, count(tag) as freq from top10_names
+group by name order by freq desc limit 10
+)
+select name from res;
+
+Eden
+Karma
+Indigo
+Spectrum
+Aura
+Nemesis
+Seven
+Odyssey
+Angel
+Juice
+
+task4: 10 artists with more unique tags
+
+with tab as(
+select tag as tag, artist_mb as name from artists9
+LATERAL VIEW explode(split(tags_lastfm, ";")) artists9 as tag 
+),
+artists_with_more_tags as(
+select name as artist, count(distinct tag) as cnt from tab
+group by tab.name order by cnt desc limit 10)
+select artist from artists_with_more_tags;
+
+Spektrum
+Karizma
+Flex
+Æther
+Jessica
+R.A.F.
+Haley
+KEY
+Hannah
+Stranger
