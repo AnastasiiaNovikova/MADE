@@ -1,0 +1,4 @@
+FROM ubuntu:14.04
+WORKDIR / home / matseralex / TEST_TEACHING
+RUN sudo apt-get update && apt-get install -y python
+CMD lsb_release -a
