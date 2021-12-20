@@ -32,34 +32,37 @@ param_values = saltelli.sample(problem, n)
 print("Generation took %s seconds:" %(time.time() - start))
 
 print(param_values)
+if __name__ == '__main__':
+    # Run model (example)
+    Y = np.zeros([param_values.shape[0]])
 
-# Run model (example)
-Y = np.zeros([param_values.shape[0]])
+    start = time.time()
+    manager = Manager()
+    return_dict = manager.dict()
+    jobs = []
+    for i, X in enumerate(param_values):
+        p = Process(target=evaluate_model, args=(X, return_dict))
+        jobs.append(p)
+        p.start()
 
-start = time.time()
-manager = Manager()
-return_dict = manager.dict()
+    for job in jobs:
+        job.join()
+    Y = np.array(return_dict.values())
 
-for i, X in enumerate(param_values):
-    p = Process(target=evaluate_model, args=(X, return_dict))
-    p.start()
-    p.join()
-Y = np.array(return_dict.values())
+    print("Evaluation took %s seconds:" %(time.time() - start))
 
-print("Evaluation took %s seconds:" %(time.time() - start))
+    start = time.time()
+    Si = sobol.analyze(problem, Y)
 
-start = time.time()
-Si = sobol.analyze(problem, Y)
-
-print("SA took %s seconds:" %(time.time() - start))
-print("First order")
-print(Si['S1']) # first order
-print("Total")
-print(Si['ST']) # total
-# second order
-print("Second order")
-print("x1-x2", Si['S2'][0,1])
-print("x1-x3", Si['S2'][0,2])
-print("x2-x3", Si['S2'][1,2])
+    print("SA took %s seconds:" %(time.time() - start))
+    print("First order")
+    print(Si['S1']) # first order
+    print("Total")
+    print(Si['ST']) # total
+    # second order
+    print("Second order")
+    print("x1-x2", Si['S2'][0,1])
+    print("x1-x3", Si['S2'][0,2])
+    print("x2-x3", Si['S2'][1,2])
 
 
