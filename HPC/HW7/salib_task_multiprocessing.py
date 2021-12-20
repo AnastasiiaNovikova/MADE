@@ -13,10 +13,11 @@ b = 0.5
 c = 0.2
 
 @njit
-def evaluate_model(x):
+def evaluate_model(x, proc_num, return_dict):
     # s = 0
     # for i in range(1000):
     #    s += i * x[i % 2]
+    retrun_dict[proc_num] = proc_num
     return a * x[2] * cos(x[0]) + b * sin(x[1]) * sin(x[1]) * sin(x[2]) + c * sin(x[0]) * x[2] ** 2 
 
 problem = {
@@ -39,15 +40,17 @@ if __name__ == '__main__':
     start = time.time()
     manager = Manager()
     return_dict = manager.dict()
+    return_dict = []
     jobs = []
     for i, X in enumerate(param_values):
-        p = Process(target=evaluate_model, args=(X, return_dict))
+        p = Process(target=evaluate_model, args=(X, i, return_dict))
         jobs.append(p)
         p.start()
 
     for job in jobs:
         job.join()
     Y = np.array(return_dict.values())
+    # Y = np.array(return_dict)
 
     print("Evaluation took %s seconds:" %(time.time() - start))
 
